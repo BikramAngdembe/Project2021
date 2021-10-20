@@ -2,20 +2,20 @@
 #include "AHT20.h"
 AHT20 AHT;
 
-int LED = 13;
-int PIR_MOTION_SENSOR = D2;
-int pirState = LOW;
+int LED = 13;								        //	Choose the pin for the LED
+int PIR_MOTION_SENSOR = D2;					//	Choose the input pin for Grove - Digital PIR Motion Sensor 
+int pirState = LOW;							    //	We start assuming no motion detected
 
 void setup() 
 {
-  pinMode(D2, INPUT);
+  pinMode(PIR_MOTION_SENSOR, INPUT);	
   Serial.begin(9600);
   Serial2.begin(9600);
   AHT.begin();
-  Serial2.println("AT+ID=DevEui, \"01f104a1d83e3fa8\"");
-  Serial2.println("AT+ID=DevAddr, \"0166bcca\"");
-  Serial2.println("AT+KEY=NWKSKEY, \"331e698de3015d78aa0977662b434d0f\"");
-  Serial2.println("AT+KEY=APPSKEY, \"c53e1de903cabc89d997072a52adc4c5\"");
+  Serial2.println("AT+ID=DevEui, \"01f104a1d83e3fa8\"");						          //	Device Extended Unique Identifier of the device		
+  Serial2.println("AT+ID=DevAddr, \"0166bcca\"");								              //	Device Emphmeral Device Address when joining networking
+  Serial2.println("AT+KEY=NWKSKEY, \"331e698de3015d78aa0977662b434d0f\"");		//	Network Session Key
+  Serial2.println("AT+KEY=APPSKEY, \"c53e1de903cabc89d997072a52adc4c5\"");		//	Application Session Key  
   Serial2.println("AT+DR=AU915");
   Serial2.println("AT+MODE=LWABP");
 }
@@ -25,16 +25,16 @@ void loop()
  
  while (Serial2.available()) 
  { 
-    Serial.write(Serial2.read()); // read it and send it out Serial (USB)
+    Serial.write(Serial2.read()); 			// Read it and send it out Serial (USB)
  }
 
-  float humi, temp;
+  float humi, temp;							
  
   int ret = AHT.getSensor(&humi, &temp);
  
   if(ret)     // GET DATA OK
   {
-    Serial2.print("AT+MSG=\"");
+    Serial2.print("AT+MSG=\"");				// Sends data to chirpstack server
     Serial2.print(temp);
     Serial2.print(",");
     Serial2.print(humi);
@@ -50,10 +50,10 @@ void loop()
     }
     delay(6000);
    
-  int sensorValue = digitalRead(PIR_MOTION_SENSOR);
+  int sensorValue = digitalRead(PIR_MOTION_SENSOR);		  // Read input value
     
-  if (sensorValue == HIGH) {
-    digitalWrite(LED, HIGH);
+  if (sensorValue == HIGH) {							              // Check if the input is HIGH
+    digitalWrite(LED, HIGH);							              // Turn LED ON
 
     if (pirState == LOW) {
       Serial2.println("AT+MSG=\"Motion Detected\"");
@@ -62,7 +62,7 @@ void loop()
     }
     delay(4000);
   }else{
-    digitalWrite(LED, LOW);
+    digitalWrite(LED, LOW);								              // Turn LED OFF
 
     if(pirState == HIGH){
       Serial2.println("AT+MSG=\"Motion Ended\"");
@@ -72,3 +72,4 @@ void loop()
       delay(4000);
     }
 }
+
